@@ -2,25 +2,36 @@
 # NOTE:
 ## Add extension: 
 ```sh 
-git clone https://github.com/deforum-art/deforum-for-automatic1111-webui extensions/deforum-for-automatic1111-webui
-git clone https://github.com/AlUlkesh/stable-diffusion-webui-images-browser extensions/stable-diffusion-webui-images-browser
-git clone https://github.com/camenduru/stable-diffusion-webui-huggingface extensions/stable-diffusion-webui-huggingface
-git clone -b v2.0 https://github.com/camenduru/sd-civitai-browser extensions/sd-civitai-browser
-git clone https://github.com/kohya-ss/sd-webui-additional-networks extensions/sd-webui-additional-networks
-git clone https://github.com/Mikubill/sd-webui-controlnet extensions/sd-webui-controlnet
-git clone https://github.com/camenduru/openpose-editor extensions/openpose-editor
-git clone https://github.com/camenduru/sd-webui-tunnels extensions/sd-webui-tunnels
+.bash-scripts/download-extension.sh
 
 ```
 ## Download model:
 
 ```sh
-./download-model.sh
+.bash-scripts/download-model.sh
 ```
+
+## Prepare environment
+```sh
+wget http://launchpadlibrarian.net/367274644/libgoogle-perftools-dev_2.5-2.2ubuntu3_amd64.deb
+wget https://launchpad.net/ubuntu/+source/google-perftools/2.5-2.2ubuntu3/+build/14795286/+files/google-perftools_2.5-2.2ubuntu3_all.deb
+wget https://launchpad.net/ubuntu/+source/google-perftools/2.5-2.2ubuntu3/+build/14795286/+files/libtcmalloc-minimal4_2.5-2.2ubuntu3_amd64.deb
+wget https://launchpad.net/ubuntu/+source/google-perftools/2.5-2.2ubuntu3/+build/14795286/+files/libgoogle-perftools4_2.5-2.2ubuntu3_amd64.deb
+apt install -qq libunwind8-dev
+dpkg -i *.deb
+%env LD_PRELOAD=libtcmalloc.so
+!rm *.deb
+
+apt-get -y install -qq aria2
+pip install -q --pre xformers
+pip install -q --pre triton
+
+```
+
 
 ## Run
 ```sh
-python launch.py --xformers --enable-insecure-extension-access --remotemoe --share
+python launch.py --share --xformers --enable-insecure-extension-access --theme dark --remotemoe --share
 ```
 
 
