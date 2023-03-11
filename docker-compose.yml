@@ -1,0 +1,22 @@
+version: "2.0"
+services:
+  app: 
+    container_name: sd-web
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    working_dir: /content
+    command: python webui.py --xformers --listen --enable-insecure-extension-access
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - .:/content
+    ports:
+      - 7860:7860
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

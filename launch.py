@@ -33,17 +33,13 @@ def check_python_version():
 
         modules.errors.print_error_explanation(f"""
 INCOMPATIBLE PYTHON VERSION
-
 This program is tested with 3.10.6 Python, but you have {major}.{minor}.{micro}.
 If you encounter an error with "RuntimeError: Couldn't install torch." message,
 or any other error regarding unsuccessful package (library) installation,
 please downgrade (or upgrade) to the latest version of 3.10 Python
 and delete current Python and "venv" folder in WebUI's directory.
-
 You can download 3.10 Python from here: https://www.python.org/downloads/release/python-3109/
-
 {"Alternatively, use a binary release of WebUI: https://github.com/AUTOMATIC1111/stable-diffusion-webui/releases" if is_windows else ""}
-
 Use --skip-python-version-check to suppress this warning.
 """)
 
@@ -111,7 +107,6 @@ def check_run(command):
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     return result.returncode == 0
 
-
 def is_installed(package):
     try:
         spec = importlib.util.find_spec(package)
@@ -134,7 +129,6 @@ def run_pip(args, desc=None):
         return
 
     index_url_line = f' --index-url {index_url}' if index_url != '' else ''
-    print(f'"{python}" -m pip {args} --prefer-binary{index_url_line}', "sssssssss")
     return run(f'"{python}" -m pip {args} --prefer-binary{index_url_line}', desc=f"Installing {desc}", errdesc=f"Couldn't install {desc}")
 
 
@@ -149,18 +143,18 @@ def git_clone(url, dir, name, commithash=None):
         if commithash is None:
             return
 
-        # current_hash = run(f'git -C "{dir}" rev-parse HEAD', None, f"Couldn't determine {name}'s hash: {commithash}").strip()
-        # if current_hash == commithash:
-        #     return
+        current_hash = run(f'"{git}" -C "{dir}" rev-parse HEAD', None, f"Couldn't determine {name}'s hash: {commithash}").strip()
+        if current_hash == commithash:
+            return
 
-        # run(f'git -C "{dir}" fetch', f"Fetching updates for {name}...", f"Couldn't fetch {name}")
-        # run(f'git -C "{dir}" checkout --force {commithash}', f"Checking out commit for {name} with hash: {commithash}...", f"Couldn't checkout commit {commithash} for {name}")
+        run(f'"{git}" -C "{dir}" fetch', f"Fetching updates for {name}...", f"Couldn't fetch {name}")
+        run(f'"{git}" -C "{dir}" checkout {commithash}', f"Checking out commit for {name} with hash: {commithash}...", f"Couldn't checkout commit {commithash} for {name}")
         return
 
-    run(f'git clone "{url}" "{dir}"', f"Cloning {name} into {dir}...", f"Couldn't clone {name}")
+    run(f'"{git}" clone "{url}" "{dir}"', f"Cloning {name} into {dir}...", f"Couldn't clone {name}")
 
     if commithash is not None:
-        run(f'git -C "{dir}" checkout --force {commithash}', None, "Couldn't checkout {name}'s hash: {commithash}")
+        run(f'"{git}" -C "{dir}" checkout {commithash}', None, "Couldn't checkout {name}'s hash: {commithash}")
 
         
 def version_check(commit):
@@ -218,6 +212,7 @@ def run_extensions_installers(settings_file):
 
 
 def prepare_environment():
+    os.system(f"""sed -i -e "s/dict()))/dict())).cuda()/g" /content/repositories/stable-diffusion-stability-ai/ldm/util.py""")
     global skip_install
 
     torch_command = os.environ.get('TORCH_COMMAND', "pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117")
@@ -266,8 +261,8 @@ def prepare_environment():
     print(f"Python {sys.version}")
     print(f"Commit hash: {commit}")
 
-    if reinstall_torch or not is_installed("torch") or not is_installed("torchvision"):
-        run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
+    # if reinstall_torch or not is_installed("torch") or not is_installed("torchvision"):
+    #     run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
 
     if not skip_torch_cuda_test:
         run_python("import torch; assert torch.cuda.is_available(), 'Torch is not able to use GPU; add --skip-torch-cuda-test to COMMANDLINE_ARGS variable to disable this check'")
@@ -298,16 +293,16 @@ def prepare_environment():
 
     os.makedirs(dir_repos, exist_ok=True)
 
-    git_clone(stable_diffusion_repo, repo_dir('stable-diffusion-stability-ai'), "Stable Diffusion", stable_diffusion_commit_hash)
-    git_clone(taming_transformers_repo, repo_dir('taming-transformers'), "Taming Transformers", taming_transformers_commit_hash)
-    git_clone(k_diffusion_repo, repo_dir('k-diffusion'), "K-diffusion", k_diffusion_commit_hash)
-    git_clone(codeformer_repo, repo_dir('CodeFormer'), "CodeFormer", codeformer_commit_hash)
-    git_clone(blip_repo, repo_dir('BLIP'), "BLIP", blip_commit_hash)
+    # git_clone(stable_diffusion_repo, repo_dir('stable-diffusion-stability-ai'), "Stable Diffusion", stable_diffusion_commit_hash)
+    # git_clone(taming_transformers_repo, repo_dir('taming-transformers'), "Taming Transformers", taming_transformers_commit_hash)
+    # git_clone(k_diffusion_repo, repo_dir('k-diffusion'), "K-diffusion", k_diffusion_commit_hash)
+    # git_clone(codeformer_repo, repo_dir('CodeFormer'), "CodeFormer", codeformer_commit_hash)
+    # git_clone(blip_repo, repo_dir('BLIP'), "BLIP", blip_commit_hash)
 
     if not is_installed("lpips"):
         run_pip(f"install -r {os.path.join(repo_dir('CodeFormer'), 'requirements.txt')}", "requirements for CodeFormer")
 
-    # run_pip(f"install -r {requirements_file}", "requirements for Web UI")
+    run_pip(f"install -r {requirements_file}", "requirements for Web UI")
 
     run_extensions_installers(settings_file=args.ui_settings_file)
 
@@ -359,5 +354,5 @@ def start():
 
 if __name__ == "__main__":
     prepare_environment()
-    os.system(f"""sed -i -e "s/dict()))/dict())).cuda()/g" repositories/stable-diffusion-stability-ai/ldm/util.py""")
-    start()
+    os.system(f"""sed -i -e "s/dict()))/dict())).cuda()/g" /content/repositories/stable-diffusion-stability-ai/ldm/util.py""")
+    #start()
