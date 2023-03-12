@@ -21,8 +21,10 @@
 # Init image
 docker build -t sdwebui:2 --force-rm -f Dockerfile .
 # Temp install in docker image when time exceeded 
-docker run --rm -it --name "sd-web" --gpus all -p 7860:7860/tcp sdwebui:2
+docker run --rm -it --name "sd-web" -v `pwd`:/content/ --gpus all -p 7860:7860/tcp sdwebui:2
 ```
+
+Or 
 
 ## Init Docker:
 ```sh
