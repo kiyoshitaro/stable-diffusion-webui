@@ -21,7 +21,7 @@
 # Init image
 docker build -t sdwebui:2 --force-rm -f Dockerfile .
 # Temp install in docker image when time exceeded 
-docker run --rm -it --name "sd-web" -v `pwd`:/content/ --gpus all -p 7860:7860/tcp sdwebui:2
+docker run -it --name "sd-web" -v `pwd`:/content/ --gpus all -p 7860:7860/tcp sdwebui:2
 ```
 
 Or 
@@ -49,10 +49,10 @@ pip install -q --pre triton
 ``` -->
 
 
-<!-- ## Run
+## Run
 ```sh
 python launch.py --share --xformers --enable-insecure-extension-access --theme dark --remotemoe --share
-``` -->
+```
 
 
 # Stable Diffusion web UI
