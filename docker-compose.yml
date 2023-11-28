@@ -6,7 +6,7 @@ services:
       context: ./
       dockerfile: ./Dockerfile
     working_dir: /content
-    command: python webui.py --xformers --listen --enable-insecure-extension-access
+    # command: python webui.py --xformers --listen --enable-insecure-extension-access
     restart: unless-stopped
     tty: true
     volumes:
